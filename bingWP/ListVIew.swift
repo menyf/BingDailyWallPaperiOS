@@ -7,10 +7,6 @@
 //
 // 获取图片 ref：http://t.cn/RfuFkj9
 
-/* 
- To-do
- 
- */
 import UIKit
 
 class ListView: UIViewController, UIImagePickerControllerDelegate,UINavigationControllerDelegate {
@@ -24,61 +20,45 @@ class ListView: UIViewController, UIImagePickerControllerDelegate,UINavigationCo
     var today: Date?
     var current: Date?
     var startDate: Date?
+    var flag:Bool=true
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-//        let displayCount=(parent as! CountingNavigationController).pushCount
-//        countLabel.text=String(displayCount)
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let tap = UITapGestureRecognizer(target: self, action: #selector(ListView.tappedMe))
+        Image.addGestureRecognizer(tap)
+        Image.isUserInteractionEnabled = true
         
         //初始化
         dateFormatter.dateFormat = "yyyy年MM月dd日"  //Label格式
         dateFormatter2.dateFormat = "yyMMdd" //链接格式
         today = Date()
-        current = Date()
+        if flag {
+            current = Date()
+        }
+        
         let start = "2016年09月28日"
         startDate = dateFormatter.date(from: start)!
         stepper.minimumValue=0
         stepper.maximumValue=(today?.timeIntervalSince(startDate!))!
-        stepper.value=(today?.timeIntervalSince(startDate!))!
+        stepper.value=(current?.timeIntervalSince(startDate!))!
         stepper.stepValue=24*60*60
         getImage(nil)
+        flag=true
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
-    //Ref: Get Document Directory Path :
+    //Get Document Directory Path :
     func getDirectoryPath() -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
         let documentsDirectory = paths[0]
         return documentsDirectory
-    }
-    
-    //Ref: Save Image At Document Directory :
-    func saveImageDocumentDirectory(){
-        let fileManager = FileManager.default
-        let paths = (NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString).appendingPathComponent("apple.jpg")
-        let image = UIImage(named: "apple.jpg")
-        print(paths)
-        let imageData = UIImageJPEGRepresentation(image!, 0.5)
-        fileManager.createFile(atPath: paths as String, contents: imageData, attributes: nil)
-    }
-    
-    //Ref: Get Image from Document Directory
-    func getImagefromDocument(){
-        let fileManager = FileManager.default
-        let imagePAth = (getDirectoryPath() as NSString).appendingPathComponent("apple.jpg")
-        if fileManager.fileExists(atPath: imagePAth){
-            self.Image.image = UIImage(contentsOfFile: imagePAth)
-        }else{
-            print("No Image")
-        }
     }
     
     //获取数据
@@ -95,7 +75,7 @@ class ListView: UIViewController, UIImagePickerControllerDelegate,UINavigationCo
             guard let data = data, error == nil else { return }
             DispatchQueue.main.async() { () -> Void in
                 self.Image.image = UIImage(data: data)
-                // 同时下载到本地
+                // 同时Save Image At Document Directory
                 let fileManager = FileManager.default
                 let paths = (NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0] as NSString).appendingPathComponent("\(self.dateFormatter2.string(from: self.current!)).jpg")
                 let image = UIImage(data: data)
@@ -147,18 +127,14 @@ class ListView: UIViewController, UIImagePickerControllerDelegate,UINavigationCo
     }
     
     
-    @IBOutlet weak var butt: UIButton!
-    @IBAction func sizeChange(_ sender: AnyObject) {
-        if self.Image.contentMode == .scaleAspectFit {
-            self.Image.contentMode = .scaleAspectFill
-            butt.setTitle("Fit", for: UIControlState.normal)
+    //轻触手势
+    func tappedMe(){
+        if Image.contentMode == .scaleAspectFill {
+            Image.contentMode = .scaleAspectFit
         }
         else{
-            self.Image.contentMode = .scaleAspectFit
-            butt.setTitle("Fill", for: UIControlState.normal)
+            Image.contentMode = .scaleAspectFill
         }
     }
-    
-    
 }
 

@@ -14,11 +14,11 @@ class Gallery: UIViewController, UITableViewDataSource,UITableViewDelegate {
     var pic=[String]()
     var months = [Int]()
     var dic = [Int: [Int]]()
-    var yourArray = [String]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        
+        //Initialize
         dateFormatter2 = DateFormatter()
         dateFormatter2?.dateFormat = "yyMMdd" //链接格式
         months = []
@@ -27,6 +27,7 @@ class Gallery: UIViewController, UITableViewDataSource,UITableViewDelegate {
         var date=Date()
         let fileManager = FileManager.default
         
+        //Visit all images
         while true {
             let id:String=(dateFormatter2?.string(from: date))!
             let imagePath = (getDirectoryPath() as NSString).appendingPathComponent("\(id).jpg")
@@ -42,7 +43,6 @@ class Gallery: UIViewController, UITableViewDataSource,UITableViewDelegate {
                     months.append(Int(id)!/100)
                     dic[Int(id)!/100]=[Int(id)!]
                 }
-                
             }
             else{
                 break
@@ -51,79 +51,64 @@ class Gallery: UIViewController, UITableViewDataSource,UITableViewDelegate {
         }
     }
 
-    //0
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+    }
+    
+    //0 numberOfSections
     func numberOfSections(in tableView: UITableView) -> Int {
         return months.count
     }
     
-    //1
+    //1 numberOfRowsInSection
     func tableView(_ tableView: UITableView, numberOfRowsInSection section:Int) -> Int {
         return dic[months[section]]!.count
     }
     
-    //2
+    //2 titleForHeaderInSection
     func tableView(_ tableView: UITableView, titleForHeaderInSection section:Int) -> String? {
         return "\(2000+months[section]/100)年\(months[section]%100)月"
     }
-    
-    
-    //3
+
+    //3 cellForRowAt
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell{
         let cell:UITableViewCell=tableView.dequeueReusableCell(withIdentifier: "imageCell")! as UITableViewCell
         
+        //Set Label
         var tmp=dic[months[indexPath.section]]
         let id:Int=(tmp?[indexPath.row])!
         cell.textLabel!.text="20\((id/10000))年\((id%10000/100))月\((id%100))日"
         
-        let fileManager = FileManager.default
+        //Set Image
         let imagePAth = (getDirectoryPath() as NSString).appendingPathComponent("\(id).jpg")
-        if fileManager.fileExists(atPath: imagePAth){
-            cell.imageView!.image = UIImage(contentsOfFile: imagePAth)
-        }else{
-//            debug.text="No image \(id!).jpg"
-        }
-    
+        cell.imageView!.image = UIImage(contentsOfFile: imagePAth)
         return cell
     }
-    
-    //4
+   
+    //4 didSelectRowAt
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        //数据处理
+        var tmp=self.dic[self.months[indexPath.section]]
+        let id:String="\((tmp?[indexPath.row])!)"
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyMMdd"
+        let currentDate:Date = dateFormatter.date(from: id)!
         
-/*
-        var flowerMessage:String
-        switch indexPath.section {
-        case kRedSection:
-            flowerMessage="You chose the red flower - \(redFlowers[indexPath.row])"
-        case kBlueSection:
-            flowerMessage="You chose the blue flower - \(blueFlowers[indexPath.row])"
-        default:
-            flowerMessage="I have no idea what you chose?!"
-        }
-        
-        let alertController=UIAlertController(title: "Flower Selected", message: flowerMessage, preferredStyle: UIAlertControllerStyle.alert)
-        
-        let defaultAction=UIAlertAction(title: "Ok", style: UIAlertActionStyle.cancel, handler: nil)
-        
-        alertController.addAction(defaultAction)
-        present(alertController, animated: true, completion: nil)
-        
- */
-//        let tmp = UIStoryboardSegue(identifier: <#T##String?#>, source: <#T##UIViewController#>, destination: <#T##UIViewController#>, performHandler: <#T##() -> Void#>)
-//        
-//        present(tmp, animated: true, completion: nil)
-        
+        //设置segue
+        let first = self.storyboard //当前View
+        let secondView:UIViewController = first!.instantiateViewController(withIdentifier: "List")
+        let secondViewController = secondView as! ListView
+        secondViewController.flag=false
+        secondViewController.current = currentDate
+        self.present(secondView, animated: true, completion: nil)
     }
     
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-    
-    //Ref: Get Document Directory Path :
+    //Get Document Directory Path :
     func getDirectoryPath() -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
         let documentsDirectory = paths[0]
         return documentsDirectory
     }
-
+    
+    
 }
