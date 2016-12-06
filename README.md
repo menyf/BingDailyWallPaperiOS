@@ -8,4 +8,4 @@ The copyright of the images are pertinent to Bing/MS.
 
 The language of this project is Swift 3, support iOS9.3+, iPhone only.
 
-For more infomation, please review [](iOS开发报告.pdf)
+For more infomation, please review [iOS开发报告](iOS开发报告.pdf)
